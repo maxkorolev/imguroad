@@ -10,6 +10,7 @@ lazy val root = (project in file("."))
     version := "0.0.1-SNAPSHOT",
     scalaVersion := "2.12.8",
     scalacOptions ++= Seq("-Ypartial-unification"),
+    dockerBaseImage := "openjdk:jre",
     libraryDependencies ++= Seq(
       "org.http4s"      %% "http4s-blaze-server" % Http4sVersion,
       "org.http4s"      %% "http4s-blaze-client" % Http4sVersion,
@@ -22,6 +23,9 @@ lazy val root = (project in file("."))
     addCompilerPlugin("org.spire-math" %% "kind-projector"     % "0.9.6"),
     addCompilerPlugin("com.olegpy"     %% "better-monadic-for" % "0.2.4")
   )
+  .enablePlugins(JavaAppPackaging)
+  .enablePlugins(AshScriptPlugin)
+  .enablePlugins(DockerPlugin)
 
 scalacOptions ++= Seq(
   "-deprecation",

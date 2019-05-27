@@ -41,7 +41,9 @@ object Uploader {
     implicit val encoder: Encoder[Job] = deriveEncoder
   }
 
-  def impl[F[_]](eventsTopic: Topic[F, Issue])(implicit F: Sync[F]): Uploader[F] =
+  def impl[F[_]](
+      eventsTopic: Topic[F, Issue]
+  )(implicit F: Sync[F]): Uploader[F] =
     new Uploader[F] {
       def upload(urls: Set[Uploader.URL]): F[JobID] =
         for {
@@ -50,9 +52,9 @@ object Uploader {
           job = Job(jobID, urls)
           _ <- eventsTopic.publish1(job)
         } yield jobID
-        
+
       def listen: Stream[F, Uploader.Job] = eventsTopic.subscribe(1).flatMap {
-        case Skip => Stream.empty
+        case Skip     => Stream.empty
         case job: Job => Stream.emit(job)
       }
     }

@@ -26,7 +26,7 @@ object ImguroadServer {
       ).orNotFound
 
       shooter = ImgurShooter.impl(client, uploader).run()
-      
+
       // With Middlewares in place
       finalHttpApp = Logger.httpApp(true, true)(httpApp)
 
