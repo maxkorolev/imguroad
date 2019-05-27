@@ -12,7 +12,7 @@ import java.{util => ju}
 
 trait Uploader[F[_]] {
   def upload(urls: Set[Uploader.URL]): F[Uploader.JobID]
-  def listen: Stream[F, Uploader.Issue]
+  def listen: Stream[F, Uploader.Job]
 }
 
 object Uploader {
@@ -45,6 +45,9 @@ object Uploader {
           _ <- eventsTopic.publish1(job)
         } yield jobID
         
-      def listen: Stream[F, Uploader.Issue] = eventsTopic.subscribe(1)
+      def listen: Stream[F, Uploader.Job] = eventsTopic.subscribe(1).flatMap {
+        case Skip => Stream.empty
+        case job: Job => Stream.emit(job)
+      }
     }
 }

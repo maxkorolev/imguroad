@@ -26,14 +26,11 @@ class UploaderSpec extends org.specs2.mutable.Specification {
 
         publishing = Stream.range(0, 10).map(_.toString).evalMap(_ => service.upload(Set("1", "2", "3")))
 
-        job <- publishing zip service.listen
+        (jobID, Job(id, urls)) <- publishing zip service.listen
 
-      } yield {
-        job match {
-          case (jobID, Job(id, urls)) => jobID == id
-          case (_, Skip) => false
-        }
-      }
+      } yield jobID == id
+        
+      
       
       io.compile.toList.unsafeRunSync() must beEqualTo ((0 to 9).map(_ => true).toList)
 
