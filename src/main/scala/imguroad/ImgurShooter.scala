@@ -22,7 +22,11 @@ trait ImgurShooter[F[_]] {
 
 object ImgurShooter {
 
-  def impl[F[_]: ContextShift](C: Client[F], U: Uploader[F], config: ImgurConfig)(
+  def impl[F[_]: ContextShift](
+      C: Client[F],
+      U: Uploader[F],
+      config: ImgurConfig
+  )(
       implicit F: Sync[F]
   ): ImgurShooter[F] = new ImgurShooter[F] {
     val dsl = new Http4sClientDsl[F] {}
@@ -49,50 +53,29 @@ object ImgurShooter {
         _ = println(downloadResp.headers.toList.mkString("\r\n"))
 
         multipart = Multipart[F](
-          Vector(
-            Part.fileData(
-              "img",
-              new File(
-                "/home/maxkorolev/Downloads/11234651086_681b3c2c00_b.jpg"
-              ),
-              ExecutionContext.global,
-              `Content-Type`(MediaType.image.jpeg),
-            )
-          )
-
-          // Vector(
-          //   Part.fileData(
-          //     "img",
-          //     "img",
-          //     downloadResp.body,
-          //     `Content-Type`(MediaType.image.png)
-          //   )
-          // )
-          // Vector(Part(downloadResp.headers, downloadResp.body))
-          // Vector()
+          Vector(Part.fileData("image", "image", downloadResp.body))
         )
 
         uploadReq <- Stream.eval(
-          POST[Multipart[F]](
-            multipart,
-            uri"https://api.imgur.com/3/upload",
-              Header(
-                "Authorization",
-                s"Bearer ${config.bearer}"
+          POST
+            .apply(
+              multipart,
+              uri"https://api.imgur.com/3/upload"
+            )
+            .map(
+              _.withHeaders(
+                Headers.of(
+                  Authorization(
+                    Credentials.Token(AuthScheme.Bearer, config.bearer)
+                  ),
+                ) ++ multipart.headers
               )
-          ).map(_.withHeaders(multipart.headers))
+            )
         )
 
         uploadResp <- C.stream(uploadReq)
 
         json <- Stream.eval(uploadResp.as[String])
-
-        _ = println(uploadResp.toString)
-        _ = println(json.toString())
-
-// _ <- C.streaming(POST()) {
-
-// }
       } yield (())
 
   }

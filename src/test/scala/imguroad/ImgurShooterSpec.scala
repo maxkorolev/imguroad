@@ -17,7 +17,7 @@ class ImgurShooterSpec extends org.specs2.mutable.Specification {
   implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
   implicit val contextShift: ContextShift[IO] =
     IO.contextShift(ExecutionContext.global)
-  val config = ImgurConfig("")
+  val config = ImgurConfig("c64022ec16e676ef84ac1d882c21897591c92efd")
 
   "ImgurShooter" >> {
     "make its job - create jobs" >> {
@@ -30,7 +30,7 @@ class ImgurShooterSpec extends org.specs2.mutable.Specification {
               ju.UUID.randomUUID(),
               Set(
                 "https://farm3.staticflickr.com/2879/11234651086_681b3c2c00_b_d.jpg",
-                // "https://farm4.staticflickr.com/3790/11244125445_3c2f32cd83_k_d.jpg"
+                "http://clipart-library.com/images/6cp6Rbyri.jpg"
               )
             )
           )

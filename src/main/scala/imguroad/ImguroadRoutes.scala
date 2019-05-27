@@ -31,6 +31,12 @@ object ImguroadRoutes {
           jobID <- U.upload(dto.urls.toSet)
           resp <- Ok(Uploader.UploadedJobIDDTO(jobID))
         } yield resp
+
+      case req @ GET -> Root / "callback" =>
+        for {
+          dto <- req.as[String]
+          resp <- Ok(dto)
+        } yield resp
     }
   }
 
