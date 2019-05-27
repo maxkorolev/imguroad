@@ -20,4 +20,6 @@ sbt
 ```scala
 sbt
 > docker:publishLocal
+> exit
+docker run --rm -p 8888:80 -e IMGUR_BEARER_TOKEN=MY_ACCESS_TOKEN imguroad:0.0.1-SNAPSHOT
 ```
