@@ -9,6 +9,7 @@ import org.http4s.implicits._
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.server.middleware.Logger
 import scala.concurrent.ExecutionContext.global
+import pureconfig.generic.auto._
 
 object ImguroadServer {
 
@@ -16,6 +17,8 @@ object ImguroadServer {
       implicit T: Timer[F],
       C: ContextShift[F]
   ): Stream[F, Nothing] = {
+
+    val config = pureconfig.loadConfigOrThrow[ImgurConfig]("imgur")
     for {
       client <- BlazeClientBuilder[F](global).stream
       topic <- Stream.eval(Topic[F, Uploader.Issue](Uploader.Skip))
@@ -25,7 +28,7 @@ object ImguroadServer {
         ImguroadRoutes.uploadRoutes[F](uploader)
       ).orNotFound
 
-      shooter = ImgurShooter.impl(client, uploader).run()
+      shooter = ImgurShooter.impl(client, uploader, config).run()
 
       // With Middlewares in place
       finalHttpApp = Logger.httpApp(true, true)(httpApp)

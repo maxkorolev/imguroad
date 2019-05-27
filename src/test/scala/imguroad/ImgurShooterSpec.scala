@@ -17,6 +17,7 @@ class ImgurShooterSpec extends org.specs2.mutable.Specification {
   implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
   implicit val contextShift: ContextShift[IO] =
     IO.contextShift(ExecutionContext.global)
+  val config = ImgurConfig("")
 
   "ImgurShooter" >> {
     "make its job - create jobs" >> {
@@ -39,7 +40,7 @@ class ImgurShooterSpec extends org.specs2.mutable.Specification {
       val io = for {
         client <- BlazeClientBuilder[IO](ExecutionContext.global).stream
 
-        _ <- ImgurShooter.impl(client, uploader).run()
+        _ <- ImgurShooter.impl(client, uploader, config).run()
 
       } yield ()
 
