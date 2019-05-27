@@ -21,5 +21,15 @@ sbt
 sbt
 > docker:publishLocal
 > exit
-docker run --rm -p 8080:80 -e IMGUR_BEARER_TOKEN=MY_ACCESS_TOKEN imguroad:0.0.1-SNAPSHOT
+docker run --rm -p 80:8080 -e IMGUR_BEARER_TOKEN=MY_ACCESS_TOKEN imguroad:0.0.1-SNAPSHOT
+```
+
+```bash
+curl -X POST \
+  http://localhost/v1/images/upload \
+  -H 'content-type: application/json' \
+  -d '{ "urls": [
+              "https://farm3.staticflickr.com/2879/11234651086_681b3c2c00_b_d.jpg",
+              "https://farm4.staticflickr.com/3790/11244125445_3c2f32cd83_k_d.jpg"
+              ]}'
 ```
