@@ -1,33 +1,37 @@
 package imguroad
 
+import io.circe._
 import cats.effect.Sync
-import cats.implicits._
-import org.http4s.HttpRoutes
+import cats.syntax.all._
+import cats.Applicative
+import org.http4s._
+import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
+import shapeless._
 
 object ImguroadRoutes {
 
-  def jokeRoutes[F[_]: Sync](J: Jokes[F]): HttpRoutes[F] = {
-    val dsl = new Http4sDsl[F]{}
+  implicit def entityDecoder[F[_]: Sync, T: Decoder](
+      implicit notEq: T =:!= Json
+  ): EntityDecoder[F, T] =
+    jsonOf[F, T]
+
+  implicit def entityEncoder[F[_]: Applicative, T: Encoder](
+      implicit notEq: T =:!= Json
+  ): EntityEncoder[F, T] =
+    jsonEncoderOf[F, T]
+
+  def uploadRoutes[F[_]: Sync](U: Uploader[F]): HttpRoutes[F] = {
+    val dsl = new Http4sDsl[F] {}
     import dsl._
     HttpRoutes.of[F] {
-      case GET -> Root / "joke" =>
+      case req @ POST -> Root / "v1" / "images" / "upload" =>
         for {
-          joke <- J.get
-          resp <- Ok(joke)
+          dto <- req.as[Uploader.UploadURLsDTO]
+          jobID <- U.upload(dto.urls.toSet)
+          resp <- Ok(Uploader.UploadedJobIDDTO(jobID))
         } yield resp
     }
   }
 
-  def helloWorldRoutes[F[_]: Sync](H: HelloWorld[F]): HttpRoutes[F] = {
-    val dsl = new Http4sDsl[F]{}
-    import dsl._
-    HttpRoutes.of[F] {
-      case GET -> Root / "hello" / name =>
-        for {
-          greeting <- H.hello(HelloWorld.Name(name))
-          resp <- Ok(greeting)
-        } yield resp
-    }
-  }
 }

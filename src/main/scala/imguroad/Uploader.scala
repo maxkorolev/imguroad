@@ -27,6 +27,12 @@ object Uploader {
     implicit val encoder: Encoder[UploadURLsDTO] = deriveEncoder
   }
 
+  final case class UploadedJobIDDTO(jobId: JobID)
+  object UploadedJobIDDTO {
+    implicit val decoder: Decoder[UploadedJobIDDTO] = deriveDecoder
+    implicit val encoder: Encoder[UploadedJobIDDTO] = deriveEncoder
+  }
+
   sealed trait Issue
   final case object Skip extends Issue
   final case class Job(id: JobID, urls: Set[URL]) extends Issue
