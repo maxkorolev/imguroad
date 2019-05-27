@@ -14,13 +14,15 @@ import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.util.CaseInsensitiveString
 import scala.concurrent.ExecutionContext
 import cats.effect.ContextShift
-import _root_.io.circe.Json
+import org.log4s.getLogger
 
 trait ImgurShooter[F[_]] {
   def run(): Stream[F, Unit]
 }
 
 object ImgurShooter {
+
+  private[this] val logger = getLogger
 
   def impl[F[_]: ContextShift](
       C: Client[F],
@@ -32,12 +34,8 @@ object ImgurShooter {
     val dsl = new Http4sClientDsl[F] {}
     import dsl._
 
-    import fs2.io.file.readAll
-    import java.io.{File, InputStream}
+    def run(): Stream[F, Unit] = {
 
-    private val ChunkSize = 8192
-
-    def run(): Stream[F, Unit] =
       for {
         job <- U.listen
         url <- Stream.emits(job.urls.toSeq)
@@ -50,8 +48,6 @@ object ImgurShooter {
 
         downloadReq <- Stream.eval(GET(urlParsed))
         downloadResp <- C.stream(downloadReq)
-        _ = println(downloadResp.headers.toList.mkString("\r\n"))
-
         multipart = Multipart[F](
           Vector(Part.fileData("image", "image", downloadResp.body))
         )
@@ -67,7 +63,7 @@ object ImgurShooter {
                 Headers.of(
                   Authorization(
                     Credentials.Token(AuthScheme.Bearer, config.bearer)
-                  ),
+                  )
                 ) ++ multipart.headers
               )
             )
@@ -78,5 +74,8 @@ object ImgurShooter {
         json <- Stream.eval(uploadResp.as[String])
       } yield (())
 
+    }.handleErrorWith { err =>
+      Stream.emit(logger.error(err.getMessage()))
+    }
   }
 }

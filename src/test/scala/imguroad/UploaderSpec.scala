@@ -30,8 +30,6 @@ class UploaderSpec extends org.specs2.mutable.Specification {
 
       } yield jobID == id
         
-      
-      
       io.compile.toList.unsafeRunSync() must beEqualTo ((0 to 9).map(_ => true).toList)
 
     }
