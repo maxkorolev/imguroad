@@ -3,10 +3,19 @@
 Imgur image uploading service that exposes a REST API.
 
 Clients of this service:
-
 1. Submit image upload jobs
 2. Each upload job is an array of image URLs. The service takes each URL,
 downloads the content, and uploads it to Imgur.
+
+Requirements
+* The service needs to download the
+image at the given URL and re-upload to Imgur.
+* OAuth client ID and secret can be embedded into the service config or injected at
+runtime.
+* Only in-memory data structures.
+* POST /v1/images/upload
+  * Should return immediately. The uploading happens asynchronously.
+  * Should log the reason for failed image uploads.
 
 ## Usage dev
 
